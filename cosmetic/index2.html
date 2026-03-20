@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AVST - Parallax Hero</title>
+	<!-- 引入字體：Gilda Display -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Gilda+Display&display=swap" rel="stylesheet">
+
+	<style>
+		/* 基礎重置 */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		/* 標題字重標準化：重置預設粗體以免破壞 Gilda Display 的優雅質感 */
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			font-weight: normal;
+		}
+
+		body {
+			/* 將初始背景色設為前導區塊的暖黑，後續交由 GSAP 動態漸變 */
+			background-color: #161615;
+			color: #ffffff;
+			font-family: 'Gilda Display', serif;
+			overflow-x: hidden;
+		}
+
+		/* 增加全畫面底片雜訊增加質感 */
+		.noise-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			pointer-events: none;
+			z-index: 9999;
+			opacity: 0.04;
+			background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+		}
+
+		/* ----- 新增：影片特效前導區塊 (依據影片重新排版) ----- */
+		.intro-sequence {
+			position: relative;
+			width: 100vw;
+			height: 100vh;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		/* 圖片層 (在背景之上，但在部分文字之下) */
+		.intro-image-layer {
+			position: absolute;
+			inset: 0;
+			z-index: 2;
+			/* 降低 z-index，讓文字可以壓在上面 */
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			pointer-events: none;
+		}
+
+		.img-pear-large {
+			position: absolute;
+			width: 100vw;
+			height: 100vh;
+			object-fit: cover;
+			transform-origin: center center;
+		}
+
+		.img-photo-small {
+			position: absolute;
+			width: 18vw;
+			min-width: 150px;
+			aspect-ratio: 10/13;
+			object-fit: cover;
+			opacity: 0;
+			transform: scale(0.4);
+			/* 取消陰影 */
+		}
+
+		/* 文字層 (最上層) */
+		.intro-text-layer {
+			position: absolute;
+			inset: 0;
+			z-index: 4;
+			/* 文字在最上層，壓過梨子 */
+			color: #ffffff;
+			font-family: 'Gilda Display', serif;
+			pointer-events: none;
+		}
+
+		/* 巨大的獨立文字區塊 (初始狀態Banner用) */
+		.intro-word-huge {
+			position: absolute;
+			margin: 0;
+			width: 100%;
+			left: 0;
+			white-space: nowrap;
+			font-weight: 400;
+			line-height: 1;
+			letter-spacing: -0.04em;
+			text-align: center;
+			will-change: transform, color;
+			transform-origin: center center;
+			color: #ffffff;
+			font-family: 'Gilda Display', serif;
+			pointer-events: none;
+		}
+
+		.word-the-second {
+			font-size: 13vw;
+			top: 8vh;
+		}
+
+		.word-ii {
+			font-size: 6vw;
+			top: 30vh;
+			letter-spacing: 0.05em;
+		}
+
+		.word-life-huge {
+			font-size: 13vw;
+			top: 48vh;
+		}
+
+		.word-of-the-food {
+			font-size: 13vw;
+			bottom: 8vh;
+		}
+
+		/* 獨立文字區塊 (新版設計) */
+		.intro-word {
+			position: absolute;
+			margin: 0;
+			white-space: nowrap;
+			font-weight: 400;
+			opacity: 0;
+			/* 初始隱藏，取代跑位特效 */
+			color: #1a1a1a;
+			/* 最終深色 */
+			will-change: opacity;
+		}
+
+		.word-top {
+			font-size: 2.8vw;
+			top: 12vh;
+			left: 50%;
+			transform: translateX(-50%);
+			text-align: center;
+			line-height: 1.2;
+			letter-spacing: 0.05em;
+		}
+
+		.word-left {
+			font-size: 1.8vw;
+			top: 50%;
+			right: 75%;
+			transform: translateY(-50%);
+		}
+
+		.word-right {
+			font-size: 1.8vw;
+			top: 50%;
+			left: 75%;
+			transform: translateY(-50%);
+		}
+
+		/* 兩側連接線條 */
+		.line-left,
+		.line-right {
+			position: absolute;
+			top: 50%;
+			height: 1px;
+			background-color: #1a1a1a;
+			z-index: 3;
+			width: 0;
+			/* 預設寬度為 0，用於延展動畫 */
+		}
+
+		.line-left {
+			right: 59%;
+			/* 從圖片左緣外生長 */
+		}
+
+		.line-right {
+			left: 59%;
+			/* 從圖片右緣外生長 */
+		}
+
+		/* 裝飾性小字 */
+		.deco-text {
+			position: absolute;
+			font-family: 'Gilda Display', serif;
+			font-size: 8px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			width: 150px;
+			z-index: 5;
+		}
+
+		.deco-1 {
+			top: 25%;
+			right: 15%;
+			text-align: left;
+			opacity: 0.6;
+		}
+
+		.deco-2 {
+			top: 40%;
+			left: 15%;
+			text-align: right;
+			opacity: 0.6;
+		}
+
+		/* ----- 新增：跑馬燈區塊 (Marquee Section) 作為完美緩衝 ----- */
+		.marquee-section {
+			/* 背景透明，讓 body 的顏色透出來，達成無縫過渡 */
+			background-color: transparent;
+			padding: 8vh 0 15vh 0;
+			overflow: hidden;
+			position: relative;
+			z-index: 50;
+		}
+
+		.marquee-row {
+			display: flex;
+			width: 100vw;
+			margin-bottom: 30px;
+		}
+
+		.marquee-track {
+			display: flex;
+			width: max-content;
+			will-change: transform;
+		}
+
+		.marquee-track.left {
+			animation: marquee-left 35s linear infinite;
+		}
+
+		.marquee-track.right {
+			animation: marquee-right 35s linear infinite;
+		}
+
+		@keyframes marquee-left {
+			0% {
+				transform: translateX(0);
+			}
+
+			100% {
+				transform: translateX(-50%);
+			}
+		}
+
+		@keyframes marquee-right {
+			0% {
+				transform: translateX(-50%);
+			}
+
+			100% {
+				transform: translateX(0);
+			}
+		}
+
+		.marquee-item {
+			display: flex;
+			align-items: center;
+			gap: 25px;
+			padding-right: 25px;
+		}
+
+		.marquee-text {
+			font-size: 45px;
+			font-weight: 300;
+			color: #1a1a1a;
+			font-family: 'Gilda Display', serif;
+			letter-spacing: 0.02em;
+		}
+
+		.marquee-img {
+			height: 70px;
+			width: 160px;
+			object-fit: cover;
+			border-radius: 50px;
+			/* 膠囊形狀 */
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+		}
+
+		/* ----- 新增：雜誌風圓弧文字排版區塊 (Magazine Section) ----- */
+		.magazine-section {
+			position: relative;
+			width: 100vw;
+			min-height: 120vh;
+			background-color: transparent;
+			/* overflow: hidden; */
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 50;
+			padding: 10vh 0;
+		}
+
+		/* 圓弧文字的旋轉容器 */
+		.circular-text-container {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 90vw;
+			/* 巨大化，讓弧線在畫面上顯得平緩 */
+			min-width: 1200px;
+			pointer-events: none;
+			z-index: 1;
+		}
+
+		.circular-text-svg {
+			width: 100%;
+			height: auto;
+			will-change: transform;
+			/* 優化旋轉效能 */
+		}
+
+		/* 內容排版容器 */
+		.mag-content {
+			position: relative;
+			width: 100%;
+			max-width: 1400px;
+			height: 100vh;
+			z-index: 2;
+		}
+
+		/* 左側大花朵圖 */
+		.mag-img-left {
+			position: absolute;
+			top: 5%;
+			left: 10%;
+			width: 32vw;
+			max-width: 450px;
+			aspect-ratio: 4/5;
+			z-index: 2;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+		}
+
+		.mag-img-left img,
+		.mag-img-right img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		/* 右側光影圖 */
+		.mag-img-right {
+			position: absolute;
+			bottom: 0%;
+			right: 12%;
+			width: 30vw;
+			max-width: 420px;
+			aspect-ratio: 1/1;
+			z-index: 2;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+		}
+
+		/* 中間文字區塊 */
+		.mag-text-center {
+			position: absolute;
+			top: 32%;
+			left: 45%;
+			z-index: 3;
+			color: #1a1a1a;
+			font-family: 'Gilda Display', serif;
+		}
+
+		.mag-label {
+			font-size: 10px;
+			letter-spacing: 0.1em;
+			margin-bottom: 25px;
+		}
+
+		.mag-title {
+			font-size: 42px;
+			font-family: 'Gilda Display', serif;
+			font-weight: 400;
+			line-height: 1.15;
+			margin-bottom: 50px;
+			letter-spacing: 0.02em;
+			color: #111;
+		}
+
+		.mag-desc {
+			font-size: 11px;
+			line-height: 1.8;
+			letter-spacing: 0.05em;
+			max-width: 260px;
+			color: #333;
+		}
+
+		.mag-pagination {
+			position: absolute;
+			bottom: 40px;
+			left: 50px;
+			font-size: 10px;
+			letter-spacing: 0.2em;
+			color: #111;
+			font-family: 'Gilda Display', serif;
+			z-index: 5;
+		}
+
+		/* RWD: 手機版垂直堆疊調整 */
+		@media (max-width: 900px) {
+			.circular-text-container {
+				/* 取消 min-width 讓它能真正隨螢幕 RWD 縮小，並調大 vw 保持弧線平緩 */
+				width: 280vw;
+				min-width: 0;
+			}
+
+			.mag-content {
+				height: auto;
+				display: flex;
+				flex-direction: column;
+				padding-top: 10vh;
+			}
+
+			.mag-img-left {
+				position: relative;
+				top: 0;
+				left: 0;
+				width: 85%;
+				margin: 0 auto 40px;
+			}
+
+			.mag-text-center {
+				position: relative;
+				top: 0;
+				left: 0;
+				padding: 0 10%;
+				margin-bottom: 50px;
+			}
+
+			.mag-img-right {
+				position: relative;
+				bottom: 0;
+				right: 0;
+				width: 85%;
+				margin: 0 auto;
+			}
+		}
+
+		/* ----- 新增：產品堆疊區塊 (Stacked Product Section) ----- */
+		.product-section {
+			/* 移除寫死的背景色，交由 GSAP 統一控制 body 顏色 */
+			background-color: transparent;
+			padding: 0 0 15vh 0;
+			/* 移除側邊 padding 讓卡片撐滿 */
+			font-family: 'Gilda Display', serif;
+			position: relative;
+			z-index: 50;
+		}
+
+		.product-title-main {
+			text-align: center;
+			color: #ffffff;
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			padding-top: 100px;
+			margin-bottom: 20px;
+			font-weight: 500;
+		}
+
+		/* 卡牌固定層 (利用 Sticky 創造堆疊效果) */
+		.stack-card-wrapper {
+			position: sticky;
+			top: 12vh;
+			/* 往下滾動時會停留在距離頂部 12vh 的位置 */
+			height: 100vh;
+			/* 佔滿螢幕高度，確保下一個卡片有足夠空間滑上來 */
+			width: 100vw;
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+		}
+
+		/* 單張卡片設計 */
+		.stack-card {
+			width: 92vw;
+			max-width: 1300px;
+			height: 75vh;
+			background-color: #ffffff;
+			/* 底部白色區域 */
+			box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.25);
+			/* 強烈陰影創造堆疊層次 */
+			display: flex;
+			flex-direction: column;
+			position: relative;
+			/* 注意：此處不能用 overflow hidden，否則左下角小瓶子會被切掉 */
+		}
+
+		/* 卡片上半部 (有顏色的區域) */
+		.card-upper {
+			height: 75%;
+			/* 根據圖片，上方全圓角，下方也有圓角露出白底 */
+			position: relative;
+			overflow: hidden;
+			/* 隱藏超出邊界的巨大英文字 */
+		}
+
+		.bg-pink {
+			background-color: #e6dcdb;
+			background-image: url('images/bg01.jpeg');
+			background-size: cover;
+			background-position: center;
+		}
+
+		.bg-blue {
+			background-color: #d1e2f3;
+		}
+
+		.card-logo {
+			position: absolute;
+			top: 35px;
+			left: 45px;
+			font-weight: 700;
+			font-size: 24px;
+			letter-spacing: 0.1em;
+			color: #333;
+			z-index: 5;
+		}
+
+		.card-logo span {
+			font-weight: 400;
+			display: block;
+			font-size: 14px;
+			margin-top: 5px;
+		}
+
+		/* 巨大背景文字 */
+		.huge-bg-text {
+			position: absolute;
+			bottom: -20px;
+			left: 20px;
+			font-size: 12vw;
+			font-weight: 800;
+			color: #ffffff;
+			line-height: 0.75;
+			white-space: nowrap;
+			letter-spacing: 0.02em;
+			z-index: 1;
+		}
+
+		/* 中央大瓶子 (模擬橫躺效果) */
+		.main-bottle {
+			position: absolute;
+			top: 50%;
+			left: 45%;
+			transform: translate(-50%, -50%) rotate(-90deg);
+			/* 旋轉 90 度模擬管狀平放 */
+			height: 80%;
+			object-fit: contain;
+			mix-blend-mode: multiply;
+			/* 自然融入背景色 */
+			filter: drop-shadow(15px -15px 20px rgba(0, 0, 0, 0.1));
+			z-index: 2;
+		}
+
+		/* 右側毛玻璃特長面板 */
+		.card-feature-box {
+			position: absolute;
+			top: 40px;
+			right: 40px;
+			background: rgba(255, 255, 255, 0.45);
+			backdrop-filter: blur(15px);
+			padding: 35px;
+			width: 320px;
+			font-size: 13px;
+			line-height: 2;
+			color: #111;
+			font-weight: 500;
+			z-index: 5;
+		}
+
+		.feature-tag {
+			text-align: center;
+			padding: 8px 0;
+			margin: 20px 0;
+			font-weight: bold;
+			font-size: 12px;
+			border-radius: 4px;
+			color: #fff;
+			letter-spacing: 0.1em;
+		}
+
+		.tag-pink {
+			background-color: #c4a1b5;
+		}
+
+		.tag-blue {
+			background-color: #8faec8;
+		}
+
+		.feature-list {
+			list-style: none;
+			font-size: 11px;
+			line-height: 2.2;
+		}
+
+		/* 卡片下半部 (白色資訊區) */
+		.card-lower {
+			height: 25%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 50px 0 220px;
+			/* 左側留白給突出的瓶子 */
+		}
+
+		.lower-info {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+		}
+
+		.lower-subtitle {
+			font-size: 11px;
+			color: #666;
+			font-weight: 600;
+			letter-spacing: 0.05em;
+		}
+
+		.lower-title {
+			font-size: 22px;
+			color: #111;
+			font-weight: 700;
+			letter-spacing: 0.05em;
+			font-family: 'Gilda Display', serif;
+		}
+
+		.lower-price {
+			font-size: 11px;
+			color: #888;
+			letter-spacing: 0.05em;
+			margin-top: 5px;
+		}
+
+		.lower-btn {
+			padding: 12px 25px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			color: #111;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.lower-btn::after {
+			content: "●";
+			font-size: 10px;
+		}
+
+		/* 跨越上下區塊的小瓶身 */
+		.small-bottle-wrap {
+			position: absolute;
+			bottom: 15px;
+			/* 壓在白底區塊上 */
+			left: 50px;
+			height: 40vh;
+			/* 高度超越下半部，切入上半部 */
+			z-index: 10;
+			filter: drop-shadow(10px 10px 15px rgba(0, 0, 0, 0.15));
+		}
+
+		.small-bottle-wrap img {
+			height: 100%;
+			object-fit: contain;
+			mix-blend-mode: multiply;
+		}
+
+		@media (max-width: 900px) {
+			.card-feature-box {
+				display: none;
+			}
+
+			.main-bottle {
+				left: 60%;
+				height: 60%;
+			}
+
+			.huge-bg-text {
+				font-size: 20vw;
+				bottom: 0;
+			}
+
+			.card-lower {
+				padding: 0 20px 0 130px;
+			}
+
+			.lower-title {
+				font-size: 16px;
+			}
+
+			.small-bottle-wrap {
+				height: 30vh;
+				left: 20px;
+			}
+
+			.lower-btn {
+				display: none;
+			}
+		}
+
+		/* ----- 頂部導覽列 (原封不動) ----- */
+		header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			padding: 40px 60px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			z-index: 100;
+			mix-blend-mode: difference;
+		}
+
+		.logo {
+			font-family: 'Gilda Display', serif;
+			font-size: 22px;
+			font-style: italic;
+			letter-spacing: 0.1em;
+		}
+
+		.nav-links {
+			display: flex;
+			gap: 50px;
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+		}
+
+		.nav-links a {
+			color: #fff;
+			text-decoration: none;
+			transition: opacity 0.3s;
+		}
+
+		.nav-links a:hover {
+			opacity: 0.6;
+		}
+
+		.contact-btn {
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.15em;
+			padding-bottom: 5px;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+			cursor: pointer;
+			transition: border-color 0.3s;
+		}
+
+		.contact-btn:hover {
+			border-color: #fff;
+		}
+
+		/* ----- 主要視覺區域 (原封不動) ----- */
+		.hero-section {
+			position: relative;
+			width: 100vw;
+			height: 130vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			overflow: hidden;
+		}
+
+		.text-content {
+			position: relative;
+			z-index: 50;
+			text-align: center;
+			pointer-events: none;
+			width: 100%;
+			margin-top: -5vh;
+		}
+
+		.small-subtitle {
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.3em;
+			margin-bottom: 30px;
+			font-style: italic;
+			font-family: 'Gilda Display', serif;
+			color: #e0e0e0;
+		}
+
+		.main-title {
+			font-family: 'Gilda Display', serif;
+			font-size: 4vw;
+			line-height: 1.05;
+			letter-spacing: -0.01em;
+			width: 500px;
+			margin: auto;
+		}
+
+		.title-mask {
+			overflow: hidden;
+			padding: 5px 0;
+		}
+
+		.title-line {
+			display: block;
+		}
+
+		.char-letter {
+			display: inline-block;
+			transform: translateY(110%);
+			opacity: 0;
+			will-change: transform, opacity;
+		}
+
+		.desc-wrapper {
+			display: flex;
+			justify-content: flex-end;
+			max-width: 900px;
+			margin: 50px auto 0;
+			padding-right: 15%;
+			gap: 60px;
+			text-align: left;
+		}
+
+		.desc-text {
+			font-size: 11px;
+			line-height: 2;
+			max-width: 220px;
+			color: #dcdcdc;
+			letter-spacing: 0.05em;
+		}
+
+		.desc-author {
+			font-size: 11px;
+			font-style: italic;
+			font-family: 'Gilda Display', serif;
+			color: #b0b0b0;
+			align-self: flex-end;
+		}
+
+		.scroll-arrow {
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			bottom: -100px;
+			width: 1px;
+			height: 50px;
+			background-color: rgba(255, 255, 255, 0.6);
+		}
+
+		.images-container {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 10;
+		}
+
+		.plx-wrapper {
+			position: absolute;
+			overflow: hidden;
+			clip-path: inset(100% 0% 0% 0%);
+		}
+
+		.plx-wrapper img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+			transform: scale(1.3);
+		}
+
+		.img-1 {
+			top: 25%;
+			left: 8%;
+			width: 14vw;
+			height: 20vw;
+			z-index: 2;
+		}
+
+		.img-2 {
+			top: 12%;
+			left: 18%;
+			width: 26vw;
+			height: 35vw;
+			z-index: 1;
+		}
+
+		.img-3 {
+			top: 68%;
+			left: 36%;
+			width: 8vw;
+			height: 11vw;
+			z-index: 3;
+		}
+
+		.img-4 {
+			top: 10%;
+			right: 22%;
+			width: 16vw;
+			height: 18vw;
+			z-index: 1;
+		}
+
+		.img-5 {
+			top: 32%;
+			right: 12%;
+			width: 14vw;
+			height: 18vw;
+			z-index: 2;
+		}
+
+		.img-6 {
+			top: 72%;
+			right: 30%;
+			width: 12vw;
+			height: 8vw;
+			z-index: 2;
+		}
+
+		.spacer {
+			height: 100vh;
+			background-color: #222;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- 雜訊層 -->
+	<div class="noise-overlay"></div>
+
+	<!-- 頂部導覽列 (一開始看不見，等往下滾動進場動畫啟動時才會如期浮現) -->
+	<header class="header-anim">
+		<div class="logo">AVST</div>
+		<div class="nav-links">
+			<a href="#">Shop +</a>
+			<a href="#">About</a>
+			<a href="#">Blog</a>
+		</div>
+		<div class="contact-btn">Contact Us</div>
+	</header>
+
+	<!-- 新增：前導影片特效區塊 (依據影片重新排版) -->
+	<section class="intro-sequence">
+		<!-- 移除 intro-bg-layer，讓最底層的 body 背景色顯露出來 -->
+
+		<div class="intro-image-layer">
+			<img class="img-pear-large" src="images/01.png" alt="Large Fruit Focus">
+			<img class="img-photo-small" src="images/02.jpg" alt="Second Photo">
+		</div>
+
+		<div class="intro-text-layer">
+			<!-- 裝飾小字 -->
+			<div class="deco-text deco-1 intro-color-change">SHADOWS<br>TEXTURES<br>THAT'S ALL ABOUT LIGHT</div>
+			<div class="deco-text deco-2 intro-color-change">FOOD<br>& STILL WATER</div>
+
+			<!-- 原版巨大黑底標題字 (初始進場 Banner) -->
+			<div class="intro-word-huge word-the-second intro-color-change">The second</div>
+			<div class="intro-word-huge word-ii intro-color-change">II</div>
+			<div class="intro-word-huge word-life-huge intro-color-change">Life</div>
+			<div class="intro-word-huge word-of-the-food intro-color-change">of the Food</div>
+
+			<!-- 新版標題元素 -->
+			<div class="intro-word word-top">WITHOUT<br>NEEDLESS HARMFUL<br>INGREDIENTS</div>
+			<div class="intro-word word-left">Beauty</div>
+			<div class="intro-word word-right">Life</div>
+			<div class="line-left"></div>
+			<div class="line-right"></div>
+		</div>
+	</section>
+
+	<!-- 加入作為過渡橋樑的膠囊形跑馬燈 -->
+	<section class="marquee-section">
+		<div class="marquee-row">
+			<div class="marquee-track left">
+				<div class="marquee-item">
+					<span class="marquee-text">charme unique.</span>
+					<img class="marquee-img"
+						src="https://images.unsplash.com/photo-1566807810034-cb233b28b584?auto=format&fit=crop&w=400&q=80"
+						alt="Orchid">
+					<span class="marquee-text">Comme une</span>
+					<img class="marquee-img"
+						src="https://images.unsplash.com/photo-1596435661642-e145b2b2b28c?auto=format&fit=crop&w=400&q=80"
+						alt="Purple Orchid">
+					<span class="marquee-text">Orchidée qui fleurit</span>
+
+					<span class="marquee-text">charme unique.</span>
+					<img class="marquee-img"
+						src="https://images.unsplash.com/photo-1566807810034-cb233b28b584?auto=format&fit=crop&w=400&q=80"
+						alt="Orchid">
+					<span class="marquee-text">Comme une</span>
+					<img class="marquee-img"
+						src="https://images.unsplash.com/photo-1596435661642-e145b2b2b28c?auto=format&fit=crop&w=400&q=80"
+						alt="Purple Orchid">
+					<span class="marquee-text">Orchidée qui fleurit</span>
+				</div>
+
+			</div>
+		</div>
+
+	</section>
+
+	<!-- 新增：雜誌風圓弧排版區塊 (置於跑馬燈與原主視覺之間) -->
+	<section class="magazine-section">
+
+		<!-- 圓弧文字 (使用 SVG TextPath 繪製以達到最完美的曲線) -->
+		<div class="circular-text-container">
+			<svg class="circular-text-svg" viewBox="0 0 1000 1000">
+				<!-- 定義一個正圓形路徑 -->
+				<path id="circle-path" d="M 500, 500 m -400, 0 a 400,400 0 1,1 800,0 a 400,400 0 1,1 -800,0"
+					fill="transparent" />
+				<text>
+					<!-- 沿著路徑排列文字 -->
+					<textPath href="#circle-path" startOffset="0%" fill="#111" font-family="'Gilda Display', serif"
+						font-size="60px" font-weight="300" letter-spacing="20px">
+						THE UNDERSTATED ELEGANCE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;THE UNDERSTATED
+						ELEGANCE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</textPath>
+				</text>
+			</svg>
+		</div>
+
+		<!-- 錯落的圖文內容 -->
+		<div class="mag-content">
+			<!-- 左側白花 -->
+			<div class="mag-img-left">
+				<img src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=800&q=80"
+					alt="White Magnolia">
+			</div>
+
+			<!-- 中央文字 -->
+			<div class="mag-text-center">
+				<div class="mag-label">ON BEAUTY</div>
+				<div class="mag-title">JUST RIGHT<br>FOR SUMMER.</div>
+				<div class="mag-desc">
+					FLORAL BUT NOT FRUITY,<br>
+					THE SUBTLE TROPICAL SCENT<br>
+					FEELS JUST RIGHT FOR<br>
+					SUMMER.<br><br>
+					\\<br>
+					A MAINSTAY IN HEADY<br>
+					COLOGNES AND<br>
+					AFTER-SHAVES, LEATHER IS<br>
+					BEING REWORKED IN<br>
+					UNEXPECTEDLY LIGHT,<br>
+					REFRESHING FRAGRANCES.
+				</div>
+			</div>
+
+			<!-- 右側光影人物 -->
+			<div class="mag-img-right">
+				<img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80"
+					alt="Light and Shadows">
+			</div>
+		</div>
+
+		<div class="mag-pagination">01 — 02 &nbsp; 03</div>
+	</section>
+
+	<!-- 原本的主視覺區塊 -->
+	<section class="hero-section">
+
+		<div class="text-content">
+			<div class="small-subtitle text-anim">It's simple.</div>
+
+			<h1 class="main-title">
+				<div class="title-mask"><span class="title-line">YOUR PERSONALITY.</span></div>
+				<div class="title-mask"><span class="title-line">YOUR OWN VISION</span></div>
+			</h1>
+
+			<div class="desc-wrapper text-anim">
+				<div class="desc-text">
+					Imperfection is beauty, madness is genius and it's better to be absolutely ridiculous than
+					absolutely boring
+				</div>
+				<div class="desc-author">
+					Glenn.18,<br>daughter of a King.
+				</div>
+			</div>
+
+			<div class="scroll-arrow text-anim"></div>
+		</div>
+
+		<div class="images-container">
+			<div class="plx-wrapper img-1" data-scroll-speed="0.08" data-mouse-speed="-0.02">
+				<img src="images/001.jpg" alt="Image 1">
+			</div>
+			<div class="plx-wrapper img-2" data-scroll-speed="0.03" data-mouse-speed="0.04">
+				<img src="images/002.jpg" alt="Image 2">
+			</div>
+			<div class="plx-wrapper img-3" data-scroll-speed="0.15" data-mouse-speed="-0.05">
+				<img src="images/003.jpg" alt="Image 3">
+			</div>
+			<div class="plx-wrapper img-4" data-scroll-speed="0.05" data-mouse-speed="0.03">
+				<img src="images/004.jpg" alt="Image 4">
+			</div>
+			<div class="plx-wrapper img-5" data-scroll-speed="0.1" data-mouse-speed="-0.03">
+				<img src="images/005.jpg" alt="Image 5">
+			</div>
+			<div class="plx-wrapper img-6" data-scroll-speed="0.18" data-mouse-speed="0.06">
+				<img src="images/006.jpg" alt="Image 6">
+			</div>
+		</div>
+	</section>
+
+	<!-- 取代原本的 spacer，新增產品區塊 (卡牌疊加特效) -->
+	<section class="product-section">
+		<div class="product-title-main">( Product Lineup )</div>
+
+		<!-- 卡片 1 (粉色系) -->
+		<div class="stack-card-wrapper" style="z-index: 1;">
+			<div class="stack-card">
+				<!-- 卡片上層顏色區 -->
+				<div class="card-upper bg-pink">
+					<div class="card-logo">THEO<br><span>standard</span></div>
+
+					<!-- 毛玻璃面板 -->
+					<div class="card-feature-box">
+						即温感 × じんわり温感の<br>
+						「ハイブリッド温感処方」で<br>
+						頭皮を気持ちよく<br>
+						ほぐしながら洗浄。<br>
+						<div class="feature-tag tag-pink">特 長</div>
+						<ul class="feature-list">
+							<li>1. 温感効果と頭皮の血行促進</li>
+							<li>2. ダブルの温感でリラックス</li>
+							<li>3. 凝り固まった頭皮をほぐしながら洗浄</li>
+						</ul>
+					</div>
+
+					<div class="huge-bg-text">SHAMPOO VITALIZ</div>
+				</div>
+
+				<!-- 卡片下層白底區 -->
+				<div class="card-lower">
+					<div class="lower-info">
+						<div class="lower-subtitle">頭皮＆髪用シャンプー</div>
+						<div class="lower-title">ジオスタンダード シャンプー バイタライズ</div>
+						<div class="lower-price">250mL ¥3,080 / 500mL ¥5,280 (付替パウチ)</div>
+					</div>
+					<div class="lower-btn">Product Details</div>
+				</div>
+
+				<!-- 跨越邊界的小瓶子 -->
+				<div class="small-bottle-wrap">
+					<img src="images/pr01.png" alt="Vitalize Bottle">
+				</div>
+			</div>
+		</div>
+
+		<!-- 卡片 2 (水藍系) -->
+		<div class="stack-card-wrapper" style="z-index: 2;">
+			<div class="stack-card">
+				<div class="card-upper bg-blue">
+					<div class="card-logo">THEO<br><span>standard</span></div>
+
+					<div class="card-feature-box">
+						冷快感 × うるおいケアを両立<br>
+						する「クールパック処方」で<br>
+						頭皮も髪も<br>
+						軽やかに洗い上げる。<br>
+						<div class="feature-tag tag-blue">特 長</div>
+						<ul class="feature-list">
+							<li>1. 冷感効果で頭皮からリフレッシュ</li>
+							<li>2. ドライ後まで続く爽快感</li>
+							<li>3. サラリと軽やかな洗い上がり</li>
+						</ul>
+					</div>
+
+					<div class="huge-bg-text">ICE FRESH SHAM</div>
+					<img class="main-bottle"
+						src="https://images.unsplash.com/photo-1628128366914-5d55b85e0de5?auto=format&fit=crop&w=600&q=80"
+						alt="Ice Fresh Main">
+				</div>
+
+				<div class="card-lower">
+					<div class="lower-info">
+						<div class="lower-subtitle">頭皮＆髪用シャンプー</div>
+						<div class="lower-title">ジオスタンダード シャンプー アイスフレッシュ</div>
+						<div class="lower-price">250mL ¥2,420 / 500mL ¥3,850 (付替パウチ)</div>
+					</div>
+					<div class="lower-btn">Product Details</div>
+				</div>
+
+				<div class="small-bottle-wrap">
+					<img src="https://images.unsplash.com/photo-1608248593842-80108311e57c?auto=format&fit=crop&w=400&q=80"
+						alt="Ice Fresh Bottle">
+				</div>
+			</div>
+		</div>
+
+		<!-- 為了讓您看到推疊的極致效果，加入第 3 張卡片 -->
+		<div class="stack-card-wrapper" style="z-index: 3;">
+			<div class="stack-card">
+				<div class="card-upper" style="background-color: #d8e1db;">
+					<div class="card-logo">THEO<br><span>standard</span></div>
+
+					<div class="card-feature-box">
+						ニオイの元となる皮脂を<br>
+						コントロールし、<br>
+						頭皮環境を健やかに保つ<br>
+						スキャルプケア。<br>
+						<div class="feature-tag" style="background-color: #9cb2a3;">特 長</div>
+						<ul class="feature-list">
+							<li>1. 頭皮のベタつきを抑える</li>
+							<li>2. 保湿成分で乾燥を防ぐ</li>
+							<li>3. 根元からふんわり立ち上がる</li>
+						</ul>
+					</div>
+
+					<div class="huge-bg-text">SCALP SERUM</div>
+					<img class="main-bottle"
+						src="https://images.unsplash.com/photo-1629198688000-71f23e745b6e?auto=format&fit=crop&w=600&q=80"
+						alt="Scalp Serum Main">
+				</div>
+
+				<div class="card-lower">
+					<div class="lower-info">
+						<div class="lower-subtitle">頭皮用美容液</div>
+						<div class="lower-title">ジオスタンダード スキャルプセラム</div>
+						<div class="lower-price">100g ¥2,640 / 300g ¥5,500 (付替パウチ)</div>
+					</div>
+					<div class="lower-btn">Product Details</div>
+				</div>
+
+				<div class="small-bottle-wrap">
+					<img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=400&q=80"
+						alt="Scalp Serum Bottle">
+				</div>
+			</div>
+		</div>
+
+	</section>
+
+	<!-- 引入 GSAP 與 ScrollTrigger -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+	<script>
+		gsap.registerPlugin(ScrollTrigger);
+
+		// --- 0. 全局背景色無縫流體漸變 (Global Background Color Flow) ---
+		// 讓 body 的顏色隨著區塊不同而像水流般變化，消除區塊間的邊界線
+
+		// 1. 到達跑馬燈/主視覺前：從黑變為米白
+		const tlIntro = gsap.timeline({
+			scrollTrigger: {
+				trigger: ".intro-sequence",
+				start: "top top",
+				end: "+=250%",
+				scrub: 1,
+				pin: true
+			}
+		});
+
+		// 關鍵修復：這裡也一律使用 fromTo 明確指定起點('#161615')與終點，避免任何預期外的跳色
+		tlIntro.fromTo('body', { backgroundColor: '#161615' }, { backgroundColor: '#f4f0ec', ease: "none", duration: 1 }, 0)
+			.fromTo('.intro-color-change', { color: '#ffffff' }, { color: '#1a1a1a', ease: "none", duration: 1 }, 0)
+
+			// 1.5 原版巨大文字往四周飛散並縮小、淡出
+			.to('.word-the-second', { x: '-38vw', y: '-35vh', scale: 0.15, opacity: 0, duration: 1 }, 0)
+			.to('.word-ii', { y: '-40vh', scale: 0.15, opacity: 0, duration: 0.8 }, 0)
+			.to('.word-life-huge', { x: '42vw', y: '-10vh', scale: 0.15, opacity: 0, duration: 1 }, 0)
+			.to('.word-of-the-food', { x: '-35vw', y: '35vh', scale: 0.15, opacity: 0, duration: 1 }, 0)
+
+			// 2. 新文字單純淡入 (不再從原版面縮小移動)
+			.to('.intro-word', { opacity: 1, duration: 0.8 }, 0.2)
+
+			// 線條往兩側長出
+			.to('.line-left', { width: '15vw', duration: 0.8 }, 0.2)
+			.to('.line-right', { width: '15vw', duration: 0.8 }, 0.2)
+
+			// 裝飾文字向外推並淡出
+			.to('.deco-1', { x: '10vw', opacity: 0, duration: 0.6 }, 0)
+			.to('.deco-2', { x: '-10vw', opacity: 0, duration: 0.6 }, 0)
+
+			// 3. 中間巨大果實縮小並消失
+			.to('.img-pear-large', { scale: 0.1, opacity: 0, duration: 0.8 }, 0)
+
+			// 4. 中間小圖浮現並放大
+			.to('.img-photo-small', { scale: 1, opacity: 1, duration: 0.8 }, 0.2);
+
+
+		// 1.8 新增：雜誌風大圓弧文字旋轉特效
+		gsap.to('.circular-text-svg', {
+			rotation: 120, // 捲動過程旋轉的角度
+			ease: "none",
+			scrollTrigger: {
+				trigger: ".magazine-section",
+				start: "top bottom",
+				end: "bottom top",
+				scrub: 1
+			}
+		});
+
+
+		// 2. 離開跑馬燈與雜誌區塊、進入主視覺時：背景從米白滑順過渡到灰綠
+		// 關鍵修復：使用 fromTo 並且設定 immediateRender: false 
+		// 防止 GSAP 在您重新整理頁面或快速滑動時抓取錯誤的預設背景色
+		gsap.fromTo('body',
+			{ backgroundColor: '#f4f0ec' }, // 嚴格規定起點顏色
+			{
+				backgroundColor: '#737667', // 嚴格規定終點顏色
+				ease: "none",
+				immediateRender: false, /* 這就是解決黑畫面/跳色的靈魂所在 */
+				scrollTrigger: {
+					trigger: ".hero-section",
+					start: "top 85%",
+					end: "top 25%",
+					scrub: 1
+				}
+			}
+		);
+
+		// 3. 離開主視覺、進入產品區塊時：背景從灰綠滑順過渡到深藍灰
+		// 關鍵修復：同上，確保這一段的過渡也堅若磐石
+		gsap.fromTo('body',
+			{ backgroundColor: '#737667' },
+			{
+				backgroundColor: '#243441',
+				ease: "none",
+				immediateRender: false, /* 這就是解決黑畫面/跳色的靈魂所在 */
+				scrollTrigger: {
+					trigger: ".product-section",
+					start: "top 85%",
+					end: "top 30%",
+					scrub: 1
+				}
+			}
+		);
+
+
+		// --- 1. 原本的高階進場動畫 (Advanced Entrance Animation) ---
+		// 將主標題文字拆分為獨立字母
+		document.querySelectorAll('.title-line').forEach(line => {
+			const text = line.textContent;
+			line.textContent = '';
+			[...text].forEach(char => {
+				const span = document.createElement('span');
+				span.textContent = char;
+				if (char === ' ') {
+					span.style.display = 'inline';
+				} else {
+					span.style.display = 'inline-block';
+				}
+				span.classList.add('char-letter');
+				line.appendChild(span);
+			});
+		});
+
+		const tlLoad = gsap.timeline({
+			scrollTrigger: {
+				trigger: ".hero-section",
+				start: "top 65%" // 稍微提早一點觸發，銜接跑馬燈的節奏
+			}
+		});
+
+		tlLoad.to('.plx-wrapper', {
+			clipPath: 'inset(0% 0% 0% 0%)',
+			duration: 1.6,
+			stagger: 0.1,
+			ease: "power4.inOut"
+		}, 0)
+			.to('.plx-wrapper img', {
+				scale: 1,
+				duration: 2,
+				stagger: 0.1,
+				ease: "power3.out"
+			}, 0)
+			// 改為一個一個字母刷出來
+			.to('.char-letter', {
+				y: 0,
+				opacity: 1,
+				duration: 1,
+				stagger: 0.03,
+				ease: "power3.out"
+			}, 0.8)
+			.from('.text-anim, .header-anim', {
+				y: 20,
+				opacity: 0,
+				duration: 1,
+				stagger: 0.1,
+				ease: "power2.out"
+			}, 1.2);
+
+
+		// --- 2. 滾動視差動畫 (Scroll Parallax) - 原封不動 ---
+		const wrappers = gsap.utils.toArray('.plx-wrapper');
+
+		wrappers.forEach(wrapper => {
+			const scrollSpeed = parseFloat(wrapper.getAttribute('data-scroll-speed'));
+
+			gsap.to(wrapper, {
+				y: () => -window.innerHeight * scrollSpeed * 4,
+				ease: "none",
+				scrollTrigger: {
+					trigger: ".hero-section",
+					start: "top top",
+					end: "bottom top",
+					scrub: 1
+				}
+			});
+		});
+
+		// --- 3. 滑鼠軌跡視差 (Mousemove Parallax) - 原封不動 ---
+		const heroSection = document.querySelector('.hero-section');
+
+		if (heroSection) {
+			heroSection.addEventListener('mousemove', (e) => {
+				const xPos = (e.clientX / window.innerWidth - 0.5) * 2;
+				const yPos = (e.clientY / window.innerHeight - 0.5) * 2;
+
+				wrappers.forEach(wrapper => {
+					const img = wrapper.querySelector('img');
+					if (img) {
+						const mouseSpeed = parseFloat(wrapper.getAttribute('data-mouse-speed'));
+
+						gsap.to(img, {
+							x: xPos * 100 * mouseSpeed,
+							y: yPos * 100 * mouseSpeed,
+							duration: 1.5,
+							ease: "power2.out"
+						});
+					}
+				});
+			});
+
+			heroSection.addEventListener('mouseleave', () => {
+				gsap.to('.plx-wrapper img', {
+					x: 0,
+					y: 0,
+					duration: 1.5,
+					ease: "power2.out"
+				});
+			});
+		}
+	</script>
+</body>
+
+</html>

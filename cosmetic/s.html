@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AVST - Editorial Design</title>
+	<!-- 引入字體：Gilda Display (英數) & Noto Sans TC (中文) -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+		rel="stylesheet">
+
+	<style>
+		/* ----- 基礎重置 ----- */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		h1, h2, h3, h4, h5, h6 {
+			font-size: inherit;
+			font-weight: normal;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background-color: #f4f0ec;
+			color: #ffffff;
+			/* 全局字體設定 */
+			font-family: 'Gilda Display', 'Noto Sans TC', serif;
+			overflow-x: hidden;
+		}
+
+		/* 增加全畫面底片雜訊增加質感 */
+		.noise-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			pointer-events: none;
+			z-index: 9999;
+			opacity: 0.04;
+			background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+		}
+
+		/* ----- 共用 Wipe Transition (擦除轉場) 容器設定 ----- */
+		.gs-wipe {
+			position: relative;
+			overflow: hidden;
+			will-change: transform, clip-path;
+		}
+
+		.gs-wipe-inner {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+			will-change: transform;
+		}
+
+		/* ----- 頂部導覽列 ----- */
+		header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			padding: 40px 60px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			z-index: 100;
+			mix-blend-mode: difference;
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+		}
+
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+			cursor: pointer;
+			color: #fff;
+			font-size: 11px;
+			letter-spacing: 0.1em;
+		}
+
+		.hamburger {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+			width: 25px;
+		}
+
+		.hamburger span {
+			display: block;
+			width: 100%;
+			height: 1px;
+			background-color: #fff;
+		}
+
+
+
+		/* ----- 第一區塊：Banner ----- */
+		.intro-sequence {
+			position: relative;
+			width: 100vw;
+			height: 100vh;
+			overflow: hidden;
+			background-color: transparent;
+			z-index: 10;
+		}
+
+		.hero-slider {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		.hero-slide {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			visibility: hidden;
+			z-index: 1;
+		}
+
+		.hero-slide.active {
+			visibility: visible;
+			z-index: 2;
+		}
+
+		.hero-split {
+			display: flex;
+			width: 100%;
+			height: 100%;
+		}
+
+		.hero-half {
+			width: 50%;
+			height: 100%;
+			position: relative;
+			overflow: hidden;
+			clip-path: inset(0 0 0 0);
+		}
+
+		.img-wrap {
+			width: 100%;
+			height: 100%;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.hero-half img {
+			position: relative;
+			width: 100%;
+			height: 120%;
+			top: -10%;
+			object-fit: cover;
+			transform: scale(1.05);
+			will-change: transform;
+		}
+
+		.hero-overlay-text {
+			position: absolute;
+			top: 50%;
+			left: 25%;
+			transform: translate(-50%, -50%);
+			z-index: 10;
+			text-align: center;
+			color: #ffffff;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 50%;
+			pointer-events: none;
+		}
+
+		.hero-tagline {
+			font-size: 14px;
+			letter-spacing: 0.2em;
+			margin-bottom: 25px;
+			font-weight: 300;
+		}
+
+		.hero-title {
+			font-size: clamp(32px, 5vw, 60px);
+			line-height: 1.2;
+			letter-spacing: 0.05em;
+			margin-bottom: 35px;
+		}
+
+		.hero-title-line {
+			overflow: hidden;
+			display: block;
+		}
+
+		.hero-title-line span {
+			display: block;
+			transform: translateY(110%);
+			will-change: transform;
+		}
+
+		.hero-center-graphic {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			font-size: 45px;
+			font-weight: 300;
+			margin-bottom: 25px;
+		}
+
+		.hero-center-box {
+			width: 65px;
+			height: 50px;
+		}
+
+		.hero-center-box img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			filter: grayscale(100%);
+		}
+
+		.hero-tagline-bottom {
+			font-size: 14px;
+			letter-spacing: 0.15em;
+			font-weight: 300;
+		}
+
+		.hero-overlay-text-right {
+			position: absolute;
+			bottom: 12%;
+			left: 75%;
+			transform: translateX(-50%);
+			z-index: 10;
+			text-align: center;
+			color: #ffffff;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 45%;
+			pointer-events: none;
+		}
+
+		.hero-right-title {
+			font-size: clamp(26px, 3.5vw, 42px);
+			line-height: 1.2;
+			letter-spacing: 0.05em;
+			margin-bottom: 20px;
+		}
+
+		.hero-right-tagline {
+			font-size: 14px;
+			letter-spacing: 0.15em;
+			font-weight: 300;
+		}
+
+		/* ----- 第二區塊：品牌理念 ----- */
+		.philosophy-section {
+			position: relative;
+			width: 100vw;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 15vh 0;
+			z-index: 20;
+			background-color: transparent;
+		}
+
+		.phil-title {
+			font-size: 28px;
+			line-height: 1.4;
+			letter-spacing: 0.05em;
+			margin-bottom: 40px;
+			color: #333;
+			text-align: center;
+		}
+
+		.phil-center-wrapper {
+			position: relative;
+			display: inline-block;
+		}
+
+		.phil-img-wrap {
+			width: 260px;
+			height: 380px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.phil-img-wrap img {
+			filter: grayscale(100%) contrast(1.1);
+		}
+
+		.phil-line-group {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			display: flex;
+			align-items: center;
+			z-index: 1;
+		}
+
+		.phil-line-group.left {
+			right: 100%;
+		}
+
+		.phil-line-group.right {
+			left: 100%;
+			flex-direction: row-reverse;
+		}
+
+		.phil-line {
+			width: 0;
+			height: 1px;
+			background-color: #999;
+		}
+
+		.phil-label {
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			color: #555;
+			white-space: nowrap;
+			text-align: center;
+			opacity: 0;
+		}
+
+		.phil-label span {
+			display: block;
+			margin-top: 4px;
+			letter-spacing: 0.2em;
+			font-weight: 300;
+		}
+
+		.phil-line-group.left .phil-label {
+			margin-right: 15px;
+		}
+
+		.phil-line-group.right .phil-label {
+			margin-left: 15px;
+		}
+
+		.phil-desc {
+			margin-top: 40px;
+			font-size: 14px;
+			line-height: 2;
+			letter-spacing: 0.1em;
+			color: #333;
+			text-align: center;
+			font-weight: 300;
+		}
+
+		.scroll-down-circle {
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			transform: translate(-50%, 50%);
+			width: 120px;
+			height: 120px;
+			border: 1px solid rgba(0, 0, 0, 0.15);
+			border-radius: 50%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 10px;
+			letter-spacing: 0.1em;
+			color: #333;
+			z-index: 30;
+			background: transparent;
+		}
+
+		/* ----- 第三區塊：雙欄特色 ----- */
+		.split-feature-section {
+			display: flex;
+			width: 100vw;
+			min-height: 100vh;
+			position: relative;
+			z-index: 20;
+		}
+
+		.split-half {
+			width: 50%;
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 15vh 0;
+			overflow: hidden;
+		}
+
+		.split-left {
+			background-color: #4a534c;
+		}
+
+		.split-left-bg {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 120%;
+			object-fit: cover;
+			opacity: 0.5;
+			z-index: 1;
+			top: -10%;
+		}
+
+		.left-card {
+			background-color: #fff;
+			width: 65%;
+			max-width: 400px;
+			padding: 50px 30px;
+			position: relative;
+			z-index: 2;
+			text-align: center;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			will-change: transform, opacity;
+		}
+
+		.left-card-title {
+			font-size: 22px;
+			line-height: 1.4;
+			letter-spacing: 0.05em;
+			margin-bottom: -15px;
+			color: #333;
+			position: relative;
+			z-index: 5;
+		}
+
+		.left-card-img-wrapper {
+			position: relative;
+			width: 75%;
+			margin-bottom: 30px;
+		}
+
+		.left-card-img-wrapper img {
+			filter: grayscale(100%);
+		}
+
+		.left-card-side-text {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			color: #333;
+			white-space: nowrap;
+			z-index: 5;
+			font-weight: 300;
+		}
+
+		.left-card-side-text.left {
+			right: calc(100% + 15px);
+		}
+
+		.left-card-side-text.right {
+			left: calc(100% + 15px);
+		}
+
+		.left-card-desc {
+			font-size: 11px;
+			line-height: 1.6;
+			letter-spacing: 0.05em;
+			color: #666;
+			font-weight: 300;
+		}
+
+		.huge-marquee-container {
+			position: absolute;
+			bottom: -3vw;
+			left: 0;
+			width: 100vw;
+			overflow: hidden;
+			z-index: 3;
+			pointer-events: none;
+			mix-blend-mode: overlay;
+		}
+
+		.huge-marquee-track {
+			display: flex;
+			white-space: nowrap;
+			width: fit-content;
+			animation: scroll-marquee 40s linear infinite;
+		}
+
+		.huge-bottom-text-marquee {
+			font-size: 15vw;
+			line-height: 1;
+			color: rgba(255, 255, 255, 0.9);
+			padding-right: 2vw;
+		}
+
+		@keyframes scroll-marquee {
+			0% {
+				transform: translateX(0%);
+			}
+
+			100% {
+				transform: translateX(-50%);
+			}
+		}
+
+		.split-right {
+			display: flex;
+			flex-direction: column;
+			padding: 15vh 10%;
+			position: relative;
+		}
+
+		.split-right-bg-wrap {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 1;
+		}
+
+		.split-right-bg {
+			width: 100%;
+			height: 120%;
+			position: relative;
+			top: -10%;
+			object-fit: cover;
+		}
+
+		.right-content {
+			position: relative;
+			z-index: 2;
+			width: 100%;
+			max-width: 450px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			height: 100%;
+		}
+
+		.right-title {
+			font-size: 28px;
+			letter-spacing: 0.05em;
+			color: #333;
+			margin-bottom: 10px;
+		}
+
+		.right-subtitle {
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			color: #333;
+			line-height: 1.6;
+			margin-bottom: 40px;
+			font-weight: 300;
+		}
+
+
+
+		.right-desc {
+			font-size: 11px;
+			line-height: 1.8;
+			letter-spacing: 0.05em;
+			color: #fff;
+			max-width: 250px;
+			font-weight: 300;
+		}
+
+
+
+		@media (max-width: 900px) {
+
+			.hero-split,
+			.split-feature-section {
+				flex-direction: column;
+			}
+
+			.hero-half,
+			.split-half {
+				width: 100%;
+				height: 50vh;
+			}
+
+			.split-half {
+				min-height: 100vh;
+			}
+
+			.hero-title {
+				font-size: 36px;
+			}
+
+			.scroll-down-circle {
+				display: none;
+			}
+		}
+
+		/* ----- 第四區塊：編輯風展示區塊 ----- */
+		.editorial-section {
+			position: relative;
+			width: 100vw;
+			padding: 15vh 0;
+			background-color: transparent;
+			z-index: 20;
+			overflow: hidden;
+		}
+
+		.edi-circle-bg {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 60vw;
+			min-width: 850px;
+			pointer-events: none;
+			z-index: 1;
+		}
+
+		.edi-circle-svg {
+			width: 100%;
+			height: auto;
+			will-change: transform;
+		}
+
+		.edi-grid {
+			position: relative;
+			z-index: 5;
+			display: grid;
+			grid-template-columns: 1.1fr 1fr 1fr;
+			max-width: 1200px;
+			margin: 0 auto;
+			gap: 0;
+			padding: 0 5%;
+		}
+
+		.edi-floating-drops {
+			position: absolute;
+			right: 5%;
+			top: 35%;
+			width: 300px;
+			z-index: 4;
+			pointer-events: none;
+			opacity: 0.9;
+		}
+
+		.edi-col {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.edi-col-left {
+			padding-top: 50px;
+		}
+
+		.edi-img-wrap {
+			position: relative;
+			width: 90%;
+			margin-bottom: 30px;
+		}
+
+		.edi-smear {
+			position: absolute;
+			bottom: -50px;
+			left: 40%;
+			width: 180px;
+			z-index: 3;
+			transform: translateX(-50%);
+		}
+
+		.edi-small-text {
+			font-size: 11px;
+			line-height: 1.8;
+			color: #555;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		.left-text {
+			margin-left: 10%;
+			margin-top: 20px;
+		}
+
+		.right-text {
+			margin-left: -10%;
+			margin-top: 20px;
+			z-index: 5;
+			position: relative;
+		}
+
+		.edi-col-center {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			padding-top: 150px;
+		}
+
+		.edi-line-top {
+			width: 1px;
+			height: 30px;
+			background-color: #999;
+			margin: 0 auto 20px auto;
+		}
+
+		.edi-text-block h3 {
+			font-size: clamp(20px, 1.8vw, 24px);
+			line-height: 1.4;
+			letter-spacing: 0.08em;
+			color: #333;
+			margin-bottom: 25px;
+			font-weight: 400;
+		}
+
+		.edi-chinese-text {
+			font-size: 14px;
+			font-weight: 700;
+			letter-spacing: 0.15em;
+			color: #111;
+			margin-bottom: 60px;
+		}
+
+		.edi-water-drop-img-wrap {
+			width: 120px;
+			height: 120px;
+			margin-bottom: 60px;
+		}
+
+		.edi-water-drop-img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.edi-text-block.text-bottom h3 {
+			font-size: 14px;
+			color: #555;
+			margin-bottom: 80px;
+		}
+
+		.edi-chinese-bottom {
+			font-size: 14px;
+			font-weight: 700;
+			letter-spacing: 0.15em;
+			color: #111;
+			margin-top: auto;
+			padding-bottom: 20px;
+		}
+
+		.edi-col-right {
+			padding-top: 300px;
+		}
+
+		.edi-hand-wrap img {
+			filter: grayscale(100%);
+		}
+
+		@media (max-width: 900px) {
+			.edi-grid {
+				grid-template-columns: 1fr;
+				gap: 60px;
+			}
+
+			.edi-col-left,
+			.edi-col-center,
+			.edi-col-right {
+				padding-top: 0;
+				align-items: center;
+				text-align: center;
+			}
+
+			.edi-img-wrap {
+				width: 80%;
+			}
+
+			.edi-small-text {
+				margin-left: 0;
+				text-align: center;
+			}
+
+			.edi-line-top {
+				display: none;
+			}
+		}
+
+		/* ----- 第五區塊：專屬光采 ----- */
+		.ritual-section {
+			position: relative;
+			width: 100vw;
+			min-height: 140vh;
+			background-color: transparent;
+			z-index: 50;
+			padding: 15vh 0;
+			overflow: hidden;
+		}
+
+		.ritual-container {
+			position: relative;
+			width: 90%;
+			max-width: 1400px;
+			height: 1000px;
+			margin: 0 auto;
+		}
+
+		.ritual-center-text {
+			position: absolute;
+			top: 35%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+			z-index: 10;
+			pointer-events: none;
+		}
+
+		.ritual-label {
+			font-size: 14px;
+			letter-spacing: 0.15em;
+			color: #e0e0e0;
+			margin-bottom: 25px;
+			display: block;
+			font-weight: 300;
+		}
+
+		.ritual-title {
+			font-size: 48px;
+			line-height: 1.35;
+			letter-spacing: 0.05em;
+			color: #ffffff;
+		}
+
+		.rit-img-box {
+			position: absolute;
+			z-index: 2;
+			will-change: transform;
+		}
+
+		.rit-img-left-main {
+			top: 8%;
+			left: 14%;
+			width: 400px;
+			height: 550px;
+		}
+
+		.rit-img-left-main img {
+			filter: grayscale(100%);
+		}
+
+		.rit-img-left-sub {
+			top: 25%;
+			left: 2%;
+			width: 220px;
+			height: 320px;
+			z-index: 3;
+		}
+
+		.rit-text-bottom-left {
+			position: absolute;
+			top: 72%;
+			left: 14%;
+			font-size: 14px;
+			line-height: 2;
+			letter-spacing: 0.08em;
+			color: #f0f0f0;
+			z-index: 5;
+			font-weight: 300;
+		}
+
+		.rit-img-bottom-left {
+			top: 70%;
+			left: 34%;
+			width: 120px;
+			height: 180px;
+		}
+
+		.rit-img-top-right {
+			top: 5%;
+			right: 25%;
+			width: 250px;
+			height: 300px;
+		}
+
+		.rit-img-mid-right {
+			top: 32%;
+			right: 5%;
+			width: 280px;
+			height: 340px;
+			z-index: 3;
+		}
+
+		.rit-text-mid-right {
+			position: absolute;
+			top: 60%;
+			right: 25%;
+			font-size: 12px;
+			line-height: 2;
+			letter-spacing: 0.05em;
+			color: #f0f0f0;
+			width: 250px;
+			z-index: 5;
+			font-weight: 300;
+		}
+
+		.rit-img-bottom-right {
+			top: 75%;
+			right: 28%;
+			width: 240px;
+			height: 160px;
+		}
+
+		.rit-img-bottom-right img {
+			filter: grayscale(100%);
+		}
+
+		.rit-bottom-center {
+			position: absolute;
+			top: 86%;
+			left: 45%;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 25px;
+			z-index: 5;
+		}
+
+		.rit-bottom-text {
+			font-size: 14px;
+			letter-spacing: 0.15em;
+			color: #ffffff;
+			font-weight: 300;
+		}
+
+		.rit-vline {
+			display: none;
+		}
+
+		@media (max-width: 900px) {
+			.ritual-section {
+				min-height: auto;
+				padding: 10vh 0;
+			}
+
+			.ritual-container {
+				height: auto;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 50px;
+				padding: 0 5%;
+			}
+
+			.ritual-center-text,
+			.rit-img-box,
+			.rit-text-bottom-left,
+			.rit-text-mid-right,
+			.rit-bottom-center {
+				position: relative;
+				top: auto;
+				left: auto;
+				right: auto;
+				bottom: auto;
+				transform: none;
+				width: 100%;
+				max-width: 400px;
+				text-align: center;
+				margin: 0 auto;
+			}
+
+			.rit-img-box {
+				height: auto;
+				aspect-ratio: 3/4;
+			}
+
+			.rit-img-bottom-right {
+				aspect-ratio: 4/3;
+			}
+
+			.rit-img-left-sub,
+			.rit-vline {
+				display: none;
+			}
+
+			.ritual-title {
+				font-size: 32px;
+			}
+		}
+
+		/* ----- 第六區塊：商品目錄 ----- */
+		.shop-collection-section {
+			position: relative;
+			width: 100vw;
+			min-height: 100vh;
+			padding: 15vh 5%;
+			z-index: 60;
+			background-color: transparent;
+			overflow: hidden;
+		}
+
+		.shop-header {
+			margin-bottom: 60px;
+		}
+
+		.shop-title {
+			font-size: 42px;
+			color: #ffffff;
+			font-weight: 400;
+			margin-bottom: 25px;
+			letter-spacing: 0.05em;
+		}
+
+		.shop-title span {
+			font-style: italic;
+			font-size: 28px;
+			color: #d1d5d8;
+			letter-spacing: 0.02em;
+		}
+
+		.shop-filters {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-end;
+			font-size: 12px;
+			color: #9ba4ab;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+			padding-bottom: 20px;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		.filters-left span {
+			color: #ffffff;
+		}
+
+		.shop-carousel {
+			display: flex;
+			gap: 30px;
+			overflow-x: auto;
+			padding-bottom: 50px;
+			scrollbar-width: none;
+			-ms-overflow-style: none;
+			scroll-behavior: smooth;
+		}
+
+		.shop-carousel::-webkit-scrollbar {
+			display: none;
+		}
+
+		.shop-card {
+			flex: 0 0 280px;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.shop-card-title {
+			font-size: 14px;
+			color: #ffffff;
+			margin-bottom: 6px;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+		}
+
+		.shop-card-sub {
+			font-size: 14px;
+			color: #d1d5d8;
+			margin-bottom: 15px;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		.shop-card-img-wrap {
+			width: 100%;
+			aspect-ratio: 4/5;
+			margin-bottom: 15px;
+			background-color: transparent;
+		}
+
+		.shop-card-vol {
+			font-size: 11px;
+			color: #d1d5d8;
+			padding-bottom: 12px;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+			margin-bottom: 12px;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		.shop-card-bottom {
+			display: flex;
+			justify-content: space-between;
+			font-size: 11px;
+			color: #d1d5d8;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		@media (max-width: 900px) {
+			.shop-filters {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 15px;
+			}
+
+			.shop-card {
+				flex: 0 0 75vw;
+			}
+		}
+
+		/* ----- 第七區塊：頁尾聯絡與保養儀式 ----- */
+		.footer-cta-section {
+			position: relative;
+			width: 100vw;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 15vh 5%;
+			overflow: hidden;
+			z-index: 70;
+			background-color: transparent;
+		}
+
+		.footer-bg-img {
+			position: absolute;
+			top: -15%;
+			left: 0;
+			width: 100%;
+			height: 130%;
+			object-fit: cover;
+			filter: grayscale(100%);
+			opacity: 0.45;
+			z-index: 1;
+		}
+
+		.footer-cta-container {
+			position: relative;
+			z-index: 10;
+			width: 100%;
+			max-width: 1100px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.footer-top-text {
+			font-size: 14px;
+			font-weight: 400;
+			letter-spacing: 0.15em;
+			color: #111;
+			margin-bottom: 50px;
+			text-align: center;
+		}
+
+		.cta-split-box {
+			display: flex;
+			width: 100%;
+		}
+
+		.cta-half {
+			flex: 1;
+			padding: 90px 50px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			justify-content: center;
+		}
+
+		.cta-left {
+			background: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), url('images/f2.jpg') center/cover no-repeat;
+			color: #111;
+		}
+
+		.cta-right {
+			background: linear-gradient(rgba(25, 25, 25, 0.7), rgba(25, 25, 25, 0.7)), url('images/f3.jpg') center/cover no-repeat;
+			color: #fff;
+		}
+
+		.cta-title {
+			font-size: 34px;
+			font-weight: 400;
+			letter-spacing: 0.05em;
+			margin-bottom: 12px;
+		}
+
+		.cta-subtitle {
+			font-size: 14px;
+			font-weight: 500;
+			letter-spacing: 0.1em;
+			margin-bottom: 40px;
+		}
+
+		.cta-desc {
+			font-size: 14px;
+			line-height: 2.2;
+			letter-spacing: 0.08em;
+			margin-bottom: 40px;
+			font-weight: 300;
+		}
+
+		.cta-btn {
+			display: inline-block;
+			padding: 15px 45px;
+			font-size: 13px;
+			letter-spacing: 0.05em;
+			text-decoration: none;
+			cursor: pointer;
+			transition: opacity 0.3s;
+		}
+
+		.cta-btn:hover {
+			opacity: 0.7;
+		}
+
+		.btn-left {
+			background-color: #e5e5e5;
+			color: #111;
+		}
+
+		.btn-right {
+			background-color: #fff;
+			color: #111;
+		}
+
+		.footer-ig {
+			margin-top: 60px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 15px;
+			color: #fff;
+			mix-blend-mode: difference;
+		}
+
+		.ig-icon-wrap {
+			font-size: 26px;
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			font-weight: 300;
+		}
+
+		.ig-text {
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			font-style: italic;
+		}
+
+		@media (max-width: 900px) {
+			.cta-split-box {
+				flex-direction: column;
+			}
+
+			.cta-half {
+				padding: 60px 30px;
+			}
+
+			.footer-top-text {
+				margin-bottom: 30px;
+			}
+		}
+
+		/* ----- 第八區塊：終極頁尾 ----- */
+		.final-footer-section {
+			position: relative;
+			width: 100vw;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 15vh 5% 5vh;
+			z-index: 80;
+			background-color: transparent;
+			text-align: center;
+		}
+
+		.ff-title {
+			font-size: clamp(32px, 4vw, 48px);
+			letter-spacing: 0.05em;
+			color: #111;
+			margin-bottom: 20px;
+			line-height: 1.3;
+		}
+
+		.ff-subtitle {
+			font-size: 14px;
+			color: #333;
+			letter-spacing: 0.05em;
+			line-height: 1.8;
+			margin-bottom: 60px;
+			font-weight: 300;
+		}
+
+		.ff-img-wrap {
+			position: relative;
+			width: 320px;
+			height: 400px;
+			margin-bottom: 40px;
+		}
+
+		.ff-img-wrap img {
+			filter: grayscale(100%) contrast(1.1);
+		}
+
+		.ff-img-text {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 24px;
+			color: #fff;
+			letter-spacing: 0.1em;
+			z-index: 2;
+		}
+
+		.ff-caption {
+			font-size: 14px;
+			color: #333;
+			letter-spacing: 0.1em;
+			margin-bottom: 12vh;
+			font-weight: 300;
+		}
+
+		.ff-nav-wrapper {
+			width: 100%;
+			max-width: 1200px;
+			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			padding-top: 50px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.ff-nav {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 30px 45px;
+			margin-bottom: 50px;
+		}
+
+		.ff-nav a {
+			color: #111;
+			text-decoration: none;
+			font-size: 14px;
+			letter-spacing: 0.1em;
+			font-weight: 400;
+			transition: opacity 0.3s;
+		}
+
+		.ff-nav a:hover {
+			opacity: 0.5;
+		}
+
+		.ff-copyright {
+			font-size: 11px;
+			color: #666;
+			letter-spacing: 0.05em;
+			font-weight: 300;
+		}
+
+		@media (max-width: 900px) {
+			.ff-img-wrap {
+				width: 85%;
+				height: auto;
+				aspect-ratio: 3/4;
+			}
+
+			.ff-nav {
+				flex-direction: column;
+				gap: 20px;
+				align-items: center;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- 底片雜訊層 -->
+	<div class="noise-overlay"></div>
+
+	<!-- 頂部導覽列 -->
+	<header>
+		<div class="logo">
+			<img src="images/logo.svg" alt="SOREVIORA Logo" style="height: 20px;">
+		</div>
+		<div class="header-right">
+			<span>MENU</span>
+			<div class="hamburger">
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+		</div>
+	</header>
+
+	<!-- 1. 新版 Banner 區塊 (Wipe + Ken Burns 動態輪播) -->
+	<section class="intro-sequence">
+
+		<div class="hero-slider">
+			<div class="hero-slide active">
+				<div class="hero-split">
+					<div class="hero-half left-half">
+						<div class="img-wrap"><img src="images/sliderL.jpg" alt="Slide 1 Left"></div>
+					</div>
+					<div class="hero-half right-half">
+						<div class="img-wrap"><img src="images/sliderR.jpg" alt="Slide 1 Right"></div>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+		<div class="hero-overlay-text">
+			<div class="hero-tagline">⟨ 最自然、最像保養品牌 ⟩</div>
+			<div class="hero-title">
+				<div class="hero-title-line"><span>BRING SKIN BACK</span></div>
+				<div class="hero-title-line"><span>TO BALANCE</span></div>
+			</div>
+			<div class="hero-center-graphic">
+				<span>(</span>
+				<div class="hero-center-box">
+					<img src="images/b1.jpg" alt="Leaf Graphic">
+				</div>
+				<span>)</span>
+			</div>
+			<div class="hero-tagline-bottom">為肌膚而生，也為生活而存在。</div>
+		</div>
+
+		<div class="hero-overlay-text-right">
+			<div class="hero-right-title">
+				<div class="hero-title-line"><span>ELEGANCE</span></div>
+				<div class="hero-title-line"><span>BEGINS WITH WHAT</span></div>
+				<div class="hero-title-line"><span>FEELS HONEST.</span></div>
+			</div>
+			<div class="hero-right-tagline">優雅，始於真實的感受。</div>
+		</div>
+	</section>
+
+	<!-- 2. 品牌理念區塊 -->
+	<section class="philosophy-section">
+		<div class="phil-title">FREE FROM THE<br>UNNECESSARY, FILLED<br>WITH CARE</div>
+
+		<div class="phil-center-wrapper">
+			<div class="phil-line-group left">
+				<div class="phil-label">( NATURAL )<span>自然</span></div>
+				<div class="phil-line"></div>
+			</div>
+
+			<!-- 擦除轉場圖片 -->
+			<div class="phil-img-wrap gs-wipe">
+				<img class="gs-wipe-inner" src="images/02 1.jpg" alt="Minimalist Floral">
+			</div>
+
+			<div class="phil-line-group right">
+				<div class="phil-label">( PURE )<span>純淨</span></div>
+				<div class="phil-line"></div>
+			</div>
+		</div>
+
+		<div class="phil-desc">每一滴、每一層，<br>都是回歸純淨、平衡與舒適的日常。</div>
+		<div class="scroll-down-circle">SCROLL DOWN</div>
+	</section>
+
+	<!-- 3. 雙欄特色區塊 -->
+	<section class="split-feature-section">
+		<div class="split-half split-left">
+			<img class="split-left-bg" src="images/b.jpg" alt="Green Leaves Texture">
+			<div class="left-card">
+				<div class="left-card-title">A RITUAL<br>OF<br>LIGHT AND SKIN</div>
+				<div class="left-card-img-wrapper gs-wipe">
+					<div class="left-card-side-text left">( 你的肌膚 )</div>
+					<img class="gs-wipe-inner" src="images/a.jpg" alt="Eye Detail">
+					<div class="left-card-side-text right">( 你的呵護 )</div>
+				</div>
+				<div class="left-card-desc">FREE FROM THE<br>UNNECESSARY, FILLED WITH<br>CARE</div>
+			</div>
+		</div>
+
+		<div class="split-half split-right">
+			<div class="split-right-bg-wrap gs-wipe">
+				<img class="split-right-bg gs-wipe-inner" src="images/c.jpg" alt="Renewal Cream Product">
+			</div>
+			<div class="right-content">
+				<div class="right-text-top">
+					<div class="right-title">SOFT RENEWAL CREAM</div>
+					<div class="right-subtitle">DEEP COMFORT. LASTING GLOW.<br>柔潤修護乳霜</div>
+				</div>
+				<div class="right-text-bottom">
+					<div class="right-desc">A rich yet breathable cream that hydrates,<br>smooths, and helps restore
+						skin's
+						natural<br>softness and radiance.</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="huge-marquee-container">
+			<div class="huge-marquee-track">
+				<span class="huge-bottom-text-marquee">clean beauty. thoughtful care. &nbsp;</span>
+				<span class="huge-bottom-text-marquee">clean beauty. thoughtful care. &nbsp;</span>
+			</div>
+		</div>
+	</section>
+
+	<!-- 4. 編輯風展示區塊 -->
+	<section class="editorial-section">
+		<div class="edi-circle-bg">
+			<svg class="edi-circle-svg" viewBox="0 0 1000 1000">
+				<path id="edi-circle-path" d="M 500, 500 m -420, 0 a 420,420 0 1,1 840,0 a 420,420 0 1,1 -840,0"
+					fill="transparent" />
+				<text>
+					<textPath href="#edi-circle-path" startOffset="0%" fill="rgba(0,0,0,0.05)" font-size="45px"
+						letter-spacing="15px">
+						LUXURY REVEAL YOUR EVERYDAY SKINCARE THAT FEELS LUXURY REVEAL YOUR EVERYDAY SKINCARE THAT FEELS
+					</textPath>
+				</text>
+			</svg>
+		</div>
+
+		<div class="edi-grid">
+			<img src="images/water.png" class="edi-floating-drops" alt="Water Drops texture">
+			<div class="edi-col edi-col-left">
+				<div class="edi-img-wrap">
+					<!-- 將 擦除轉場圖片 綁在內部，讓抹痕可以溢出 -->
+					<div class="gs-wipe" style="width: 100%; height: 100%;">
+						<img class="edi-flower gs-wipe-inner" src="images/010.jpg" alt="White Flower Detail"
+							style="width: 100%; height: auto; display: block;">
+					</div>
+					<img class="edi-smear" src="images/water2.png" alt="Cream Texture">
+				</div>
+				<p class="edi-small-text left-text">A modern skincare ritual created to<br>bring balance, softness,
+					and<br>radiance to every day.</p>
+			</div>
+
+			<div class="edi-col edi-col-center">
+				<div class="edi-text-block text-top">
+					<div class="edi-line-top"></div>
+					<h3>FREE FROM THE<br>UNNECESSARY, FILLED<br>WITH CARE</h3>
+					<p class="edi-chinese-text">( 如奢華般細緻的日常保養 )</p>
+				</div>
+
+				<div class="edi-water-drop-img-wrap gs-wipe">
+					<img class="edi-water-drop-img gs-wipe-inner" src="images/009.jpg" alt="Water Surface">
+				</div>
+
+				<div class="edi-text-block text-bottom">
+					<h3>FREE FROM THE<br>UNNECESSARY, FILLED WITH<br>CARE</h3>
+				</div>
+				<p class="edi-chinese-bottom">平衡肌膚所帶來的安定光采</p>
+			</div>
+
+			<div class="edi-col edi-col-right">
+				<div class="edi-img-wrap edi-hand-wrap gs-wipe">
+					<img class="edi-hand gs-wipe-inner" src="images/008 1.jpg" alt="Hand Holding Skincare">
+				</div>
+				<p class="edi-small-text right-text">Thoughtful skincare made to reflect<br>who you are —<br>pure,
+					balanced, and beautifully<br>effortless.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- 5. 專屬光采區塊 -->
+	<section class="ritual-section">
+		<div class="ritual-container">
+			<div class="ritual-center-text">
+				<span class="ritual-label">( 你的專屬光采 )</span>
+				<h2 class="ritual-title">YOUR NATURAL<br>BEAUTY<br>YOUR OWN<br>RITUAL</h2>
+			</div>
+
+			<!-- 擦除轉場圖片 (包裹成絕對定位區塊) -->
+			<div class="rit-img-box rit-img-left-main gs-wipe"><img class="gs-wipe-inner" src="images/002 1.jpg"
+					alt="Black and White Lily"></div>
+			<div class="rit-img-box rit-img-left-sub gs-wipe"><img class="gs-wipe-inner" src="images/Frame 21.jpg"
+					alt="Green Leaf Overlap"></div>
+
+			<div class="rit-text-bottom-left">
+				美，不是改變，而是展現。<br>
+				我們為渴望平衡、柔和與光采的肌膚而創作。<br>
+				每一道配方，都是一種呵護的姿態。
+			</div>
+
+			<div class="rit-img-box rit-img-bottom-left gs-wipe"><img class="gs-wipe-inner" src="images/Frame 25.jpg"
+					alt="Blue Bottle"></div>
+			<div class="rit-img-box rit-img-top-right gs-wipe"><img class="gs-wipe-inner" src="images/Frame 22.jpg"
+					alt="Yellow Flowers and Products"></div>
+			<div class="rit-img-box rit-img-mid-right gs-wipe"><img class="gs-wipe-inner" src="images/Frame 23.jpg"
+					alt="Dropper Bottles"></div>
+
+			<div class="rit-text-mid-right">
+				Inspired by nature and refined for<br>
+				modern skin,<br>
+				each formula is made to restore<br>
+				balance, softness, and a healthy-<br>
+				looking glow.
+			</div>
+
+			<div class="rit-img-box rit-img-bottom-right gs-wipe"><img class="gs-wipe-inner" src="images/Frame 24.jpg"
+					alt="Cream Jar Black and White"></div>
+
+			<div class="rit-bottom-center">
+				<span class="rit-bottom-text">素淨肌膚，更好光采</span>
+				<div class="rit-vline"></div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 6. 商品目錄區塊 -->
+	<section class="shop-collection-section">
+		<div class="shop-header">
+			<div class="shop-title">SHOP/ <span>collection</span></div>
+			<div class="shop-filters">
+				<div class="filters-left"><span>All</span>, Cleanser, Serum, Cream, Mist, Mask</div>
+				<div class="filters-right">8 Essentials</div>
+			</div>
+		</div>
+
+		<div class="shop-carousel">
+			<!-- 卡片內的圖片也套用擦除特效 -->
+			<div class="shop-card">
+				<div class="shop-card-title">SOFT RENEWAL CREAM</div>
+				<div class="shop-card-sub">光采修護精華</div>
+				<div class="shop-card-img-wrap gs-wipe"><img class="gs-wipe-inner"
+						src="images/f9.jpg"
+						alt="Renewal Cream"></div>
+				<div class="shop-card-vol">50 ml / 1.69 fl. oz.</div>
+				<div class="shop-card-bottom">
+					<span>NT $2,560</span>
+					<span>( see more )</span>
+				</div>
+			</div>
+
+			<div class="shop-card">
+				<div class="shop-card-title">PURE CLEANSING MILK</div>
+				<div class="shop-card-sub">純淨潔顏乳</div>
+				<div class="shop-card-img-wrap gs-wipe"><img class="gs-wipe-inner"
+						src="images/f8.jpg"
+						alt="Cleansing Milk"></div>
+				<div class="shop-card-vol">120 ml / 4.05 fl. oz.</div>
+				<div class="shop-card-bottom">
+					<span>NT $2,560</span>
+					<span>( see more )</span>
+				</div>
+			</div>
+
+			<div class="shop-card">
+				<div class="shop-card-title">RADIANCE RENEWAL SERUM</div>
+				<div class="shop-card-sub">光采精華液</div>
+				<div class="shop-card-img-wrap gs-wipe"><img class="gs-wipe-inner"
+						src="images/f7.jpg"
+						alt="Renewal Serum"></div>
+				<div class="shop-card-vol">50 ml / 1.69 fl. oz.</div>
+				<div class="shop-card-bottom">
+					<span>NT $2,560</span>
+					<span>( see more )</span>
+				</div>
+			</div>
+
+			<div class="shop-card">
+				<div class="shop-card-title">CALMING FACIAL MIST</div>
+				<div class="shop-card-sub">舒緩保濕噴霧</div>
+				<div class="shop-card-img-wrap gs-wipe"><img class="gs-wipe-inner"
+						src="images/f6.jpg"
+						alt="Facial Mist"></div>
+				<div class="shop-card-vol">50 ml / 1.69 fl. oz.</div>
+				<div class="shop-card-bottom">
+					<span>NT $2,560</span>
+					<span>( see more )</span>
+				</div>
+			</div>
+
+			<div class="shop-card">
+				<div class="shop-card-title">SOFT BARRIER LOTION</div>
+				<div class="shop-card-sub">柔潤屏護乳液</div>
+				<div class="shop-card-img-wrap gs-wipe"><img class="gs-wipe-inner"
+						src="images/f5.jpg"
+						alt="Barrier Lotion"></div>
+				<div class="shop-card-vol">150 ml / 5.0 fl. oz.</div>
+				<div class="shop-card-bottom">
+					<span>NT $2,560</span>
+					<span>( see more )</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 7. 頁尾聯絡與保養儀式區塊 -->
+	<section class="footer-cta-section">
+		<img class="footer-bg-img"
+			src="images/f4.jpg"
+			alt="Plant Macro Background">
+
+		<div class="footer-cta-container">
+			<div class="footer-top-text">接收最新保養靈感、新品消息與品牌日常</div>
+
+			<div class="cta-split-box">
+				<div class="cta-half cta-left">
+					<h3 class="cta-title">Skin Ritual</h3>
+					<p class="cta-subtitle">你的日常保養儀式</p>
+					<p class="cta-desc">保養不只是步驟，<br>而是一種回到自己、回到肌膚平衡的過程。<br>探索我們為現代肌膚設計的保養系列，<br>感受純淨、柔和與安靜光采。</p>
+					<a href="#" class="cta-btn btn-left">Discover More</a>
+				</div>
+
+				<div class="cta-half cta-right">
+					<h3 class="cta-title">Customer Care</h3>
+					<p class="cta-subtitle">聯絡我們</p>
+					<p class="cta-desc">若您需要產品建議、訂單協助、合作洽詢<br>或任何與品牌相關的資訊，<br>歡迎與我們聯繫。<br>我們樂於為您提供溫柔且細緻的服務體驗。</p>
+					<a href="#" class="cta-btn btn-right">Get in Touch</a>
+				</div>
+			</div>
+
+			<div class="footer-ig">
+				<div class="ig-icon-wrap">
+					<span>(</span>
+					<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+						<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+						<line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+					</svg>
+					<span>)</span>
+				</div>
+				<div class="ig-text">instagram</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 8. 終極頁尾區塊 -->
+	<section class="final-footer-section">
+		<h2 class="ff-title">PURE CARE. QUIET<br>RADIANCE</h2>
+		<p class="ff-subtitle">Clean, refined, and made with care — skincare that supports<br>your skin in the gentlest
+			way.</p>
+
+		<!-- 擦除轉場圖片 -->
+		<div class="ff-img-wrap gs-wipe">
+			<img class="gs-wipe-inner"
+				src="images/f1.jpg"
+				alt="Minimalist Beauty Portrait">
+			<div class="ff-img-text">SOREVIORA</div>
+		</div>
+
+		<p class="ff-caption">純淨、細緻、溫柔而生，讓保養以最舒適的方式陪伴肌膚。</p>
+
+		<div class="ff-nav-wrapper">
+			<div class="ff-nav">
+				<a href="#">( 產品系列 )</a>
+				<a href="#">品牌理念</a>
+				<a href="#">品牌日誌</a>
+				<a href="#">常見問題</a>
+				<a href="#">聯絡我們</a>
+				<a href="#">隱私政策</a>
+			</div>
+			<div class="ff-copyright">© 2026 SOREVIORA. All rights reserved.</div>
+		</div>
+	</section>
+
+	<!-- 引入 GSAP 與 ScrollTrigger -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+	<script>
+		gsap.registerPlugin(ScrollTrigger);
+
+		// =========================================================
+		// 0. 全局共用：頂級 Wipe Transition (擦除轉場) + Ken Burns
+		// =========================================================
+		gsap.utils.toArray('.gs-wipe').forEach(wrapper => {
+			let inner = wrapper.querySelector('.gs-wipe-inner');
+			if (!inner) return;
+
+			gsap.set(wrapper, { clipPath: 'inset(100% 0 0 0)' });
+			gsap.set(inner, { scale: 1.15 });
+
+			const tlWipe = gsap.timeline({
+				scrollTrigger: {
+					trigger: wrapper,
+					start: 'top 85%'
+				}
+			});
+
+			tlWipe.to(wrapper, {
+				clipPath: 'inset(0% 0% 0% 0%)',
+				duration: 1.8,
+				ease: 'power4.inOut'
+			}, 0)
+				.to(inner, {
+					scale: 1,
+					duration: 1.8,
+					ease: 'power4.inOut'
+				}, 0);
+		});
+
+
+		// =========================================================
+		// 1. 高端輪播：Wipe Transition (擦除) + Ken Burns (縮放)
+		// =========================================================
+		const slides = gsap.utils.toArray('.hero-slide');
+		let currentIndex = 0;
+
+		// 初始載入第一張也套用 Wipe Transition 擦除進場
+		gsap.set(slides[0], { visibility: 'visible', zIndex: 2 });
+		gsap.set(slides[0].querySelector('.left-half'), { clipPath: 'inset(100% 0% 0% 0%)' });
+		gsap.set(slides[0].querySelector('.right-half'), { clipPath: 'inset(0% 0% 100% 0%)' });
+
+		gsap.fromTo(slides[0].querySelectorAll('img'),
+			{ scale: 1.05 },
+			{ scale: 1, duration: 11.8, ease: 'none' }
+		);
+
+		gsap.to(slides[0].querySelectorAll('.hero-half'), {
+			clipPath: 'inset(0% 0% 0% 0%)',
+			duration: 1.8,
+			ease: 'power4.inOut',
+			stagger: 0.1
+		});
+
+		// 進場動畫優化 (強化特效)
+		gsap.from('.hero-tagline', { y: 20, opacity: 0, letterSpacing: '0.4em', duration: 1.5, ease: 'power4.out', delay: 1 });
+		gsap.to('.hero-title-line span', { y: '0%', duration: 1.5, ease: 'power4.out', stagger: 0.1, delay: 1.2 });
+		gsap.from('.hero-center-graphic', { y: 20, opacity: 0, rotation: -10, duration: 1.5, ease: 'power3.out', delay: 1.4 });
+		gsap.from('.hero-tagline-bottom, .hero-right-tagline', { y: 20, opacity: 0, duration: 1.5, ease: 'power3.out', delay: 1.5 });
+
+		// hero-slider 往下滾動互動卷軸 (Parallax)
+		gsap.to('.hero-half img', {
+			yPercent: 15,
+			ease: 'none',
+			scrollTrigger: {
+				trigger: '.intro-sequence',
+				start: 'top top',
+				end: 'bottom top',
+				scrub: true
+			}
+		});
+
+
+
+
+		// =========================================================
+		// 2. 下方內容：更絲滑的 ScrollTrigger 視差與漸變 (延長 Scrub)
+		// =========================================================
+
+		// --- 區塊 2：品牌理念 ---
+		gsap.to('.phil-line', {
+			width: '18vw', duration: 1.2, ease: "power2.out",
+			scrollTrigger: { trigger: ".philosophy-section", start: "top 60%" }
+		});
+		gsap.to('.phil-label', {
+			opacity: 1, duration: 1, delay: 0.4,
+			scrollTrigger: { trigger: ".philosophy-section", start: "top 60%" }
+		});
+
+
+		// --- 區塊 3：雙欄特色 ---
+		gsap.to('.split-left-bg', {
+			yPercent: 20, ease: "none",
+			scrollTrigger: { trigger: ".split-feature-section", start: "top bottom", end: "bottom top", scrub: 1.5 }
+		});
+
+		gsap.from('.left-card', {
+			y: 80, opacity: 0, duration: 1.5, ease: "power3.out",
+			scrollTrigger: { trigger: ".split-feature-section", start: "top 60%" }
+		});
+
+
+		// --- 區塊 4：編輯風展示 ---
+		gsap.to('.edi-circle-svg', {
+			rotation: 90, ease: "none",
+			scrollTrigger: { trigger: ".editorial-section", start: "top bottom", end: "bottom top", scrub: 1.5 }
+		});
+
+		// 對包裹器做視差，不影響內部的 Wipe 縮放
+		gsap.utils.toArray(['.edi-col-left .edi-img-wrap', '.edi-col-right .edi-img-wrap']).forEach(wrap => {
+			gsap.fromTo(wrap, { y: 60 }, {
+				y: -60, ease: "none",
+				scrollTrigger: { trigger: wrap, start: "top bottom", end: "bottom top", scrub: 1.5 }
+			});
+		});
+
+		// 水珠稍微有上浮視差效果
+		gsap.to('.edi-floating-drops', {
+			y: -80, ease: "none",
+			scrollTrigger: { trigger: ".editorial-section", start: "top bottom", end: "bottom top", scrub: 2 }
+		});
+
+
+		// --- 區塊 5：專屬光采 ---
+		gsap.fromTo('body',
+			{ backgroundColor: '#f4f0ec' }, {
+			backgroundColor: '#7a7c6e', ease: "none", immediateRender: false,
+			scrollTrigger: { trigger: ".ritual-section", start: "top 55%", end: "top 10%", scrub: 1.5 }
+		}
+		);
+
+		gsap.utils.toArray('.rit-img-box').forEach((box, i) => {
+			let speed = i % 2 === 0 ? 80 : -60;
+			gsap.fromTo(box, { y: speed }, {
+				y: -speed, ease: "none",
+				scrollTrigger: { trigger: ".ritual-section", start: "top bottom", end: "bottom top", scrub: 1.5 }
+			});
+		});
+
+
+		// --- 區塊 6：SHOP 目錄 ---
+		gsap.fromTo('body',
+			{ backgroundColor: '#7a7c6e' }, {
+			backgroundColor: '#2b363c', ease: "none", immediateRender: false,
+			scrollTrigger: { trigger: ".shop-collection-section", start: "top 85%", end: "top 30%", scrub: 1.5 }
+		}
+		);
+
+		gsap.from('.shop-card', {
+			y: 60, opacity: 0, duration: 1.2, stagger: 0.1, ease: 'power3.out',
+			scrollTrigger: { trigger: '.shop-collection-section', start: 'top 65%' }
+		});
+
+
+		// --- 區塊 7：Footer CTA ---
+		gsap.fromTo('body',
+			{ backgroundColor: '#2b363c' }, {
+			backgroundColor: '#d1d1cd', ease: "none", immediateRender: false,
+			scrollTrigger: { trigger: ".footer-cta-section", start: "top 85%", end: "top 30%", scrub: 1.5 }
+		}
+		);
+
+		gsap.to('.footer-bg-img', {
+			yPercent: 15, ease: "none",
+			scrollTrigger: { trigger: ".footer-cta-section", start: "top bottom", end: "bottom top", scrub: 1.5 }
+		});
+
+		gsap.from('.cta-split-box', {
+			y: 80, opacity: 0, duration: 1.5, ease: 'power3.out',
+			scrollTrigger: { trigger: ".footer-cta-section", start: "top 65%" }
+		});
+
+
+		// --- 區塊 8：終極頁尾 ---
+		gsap.fromTo('body',
+			{ backgroundColor: '#d1d1cd' }, {
+			backgroundColor: '#f0f0f0', ease: "none", immediateRender: false,
+			scrollTrigger: { trigger: ".final-footer-section", start: "top 85%", end: "top 30%", scrub: 1.5 }
+		}
+		);
+
+		gsap.from('.final-footer-section > *:not(.ff-nav-wrapper, .ff-img-wrap)', {
+			y: 50, opacity: 0, duration: 1.5, stagger: 0.2, ease: 'power3.out',
+			scrollTrigger: { trigger: '.final-footer-section', start: 'top 75%' }
+		});
+
+	</script>
+</body>
+
+</html>
